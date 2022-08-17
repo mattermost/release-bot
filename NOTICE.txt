@@ -1,0 +1,10 @@
+Mattermost Release Bot
+
+©2022 Mattermost, Inc.  All Rights Reserved.  See LICENSE.txt for license information.
+
+NOTICES:
+--------
+
+This document includes a list of open source components used in Release Bot, including those that have been modified.
+
+--------
