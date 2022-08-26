@@ -1,0 +1,351 @@
+{
+    "ref": "refs/heads/feat/cld-3876-create-github-release-bot-for-unified-ci",
+    "before": "e2607367d899f40da62ad70cfe42a95b807cfbe2",
+    "after": "e849bae468c92cc43a4bd18e8985a12ba06d7d64",
+    "repository": {
+      "id": 525753781,
+      "node_id": "R_kgDOH1ZdtQ",
+      "name": "release-bot",
+      "full_name": "mattermost/release-bot",
+      "private": false,
+      "owner": {
+        "name": "mattermost",
+        "email": "info@mattermost.com",
+        "login": "mattermost",
+        "id": 9828093,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjk4MjgwOTM=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/9828093?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/mattermost",
+        "html_url": "https://github.com/mattermost",
+        "followers_url": "https://api.github.com/users/mattermost/followers",
+        "following_url": "https://api.github.com/users/mattermost/following{/other_user}",
+        "gists_url": "https://api.github.com/users/mattermost/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/mattermost/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/mattermost/subscriptions",
+        "organizations_url": "https://api.github.com/users/mattermost/orgs",
+        "repos_url": "https://api.github.com/users/mattermost/repos",
+        "events_url": "https://api.github.com/users/mattermost/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/mattermost/received_events",
+        "type": "Organization",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/mattermost/release-bot",
+      "description": "Release Bot - An internal Mattermost Github Application to trigger secure pipelines for public repositories.",
+      "fork": false,
+      "url": "https://github.com/mattermost/release-bot",
+      "forks_url": "https://api.github.com/repos/mattermost/release-bot/forks",
+      "keys_url": "https://api.github.com/repos/mattermost/release-bot/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/mattermost/release-bot/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/mattermost/release-bot/teams",
+      "hooks_url": "https://api.github.com/repos/mattermost/release-bot/hooks",
+      "issue_events_url": "https://api.github.com/repos/mattermost/release-bot/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/mattermost/release-bot/events",
+      "assignees_url": "https://api.github.com/repos/mattermost/release-bot/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/mattermost/release-bot/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/mattermost/release-bot/tags",
+      "blobs_url": "https://api.github.com/repos/mattermost/release-bot/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/mattermost/release-bot/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/mattermost/release-bot/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/mattermost/release-bot/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/mattermost/release-bot/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/mattermost/release-bot/languages",
+      "stargazers_url": "https://api.github.com/repos/mattermost/release-bot/stargazers",
+      "contributors_url": "https://api.github.com/repos/mattermost/release-bot/contributors",
+      "subscribers_url": "https://api.github.com/repos/mattermost/release-bot/subscribers",
+      "subscription_url": "https://api.github.com/repos/mattermost/release-bot/subscription",
+      "commits_url": "https://api.github.com/repos/mattermost/release-bot/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/mattermost/release-bot/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/mattermost/release-bot/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/mattermost/release-bot/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/mattermost/release-bot/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/mattermost/release-bot/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/mattermost/release-bot/merges",
+      "archive_url": "https://api.github.com/repos/mattermost/release-bot/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/mattermost/release-bot/downloads",
+      "issues_url": "https://api.github.com/repos/mattermost/release-bot/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/mattermost/release-bot/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/mattermost/release-bot/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/mattermost/release-bot/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/mattermost/release-bot/labels{/name}",
+      "releases_url": "https://api.github.com/repos/mattermost/release-bot/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/mattermost/release-bot/deployments",
+      "created_at": 1660734509,
+      "updated_at": "2022-08-17T11:08:29Z",
+      "pushed_at": 1661496613,
+      "git_url": "git://github.com/mattermost/release-bot.git",
+      "ssh_url": "git@github.com:mattermost/release-bot.git",
+      "clone_url": "https://github.com/mattermost/release-bot.git",
+      "svn_url": "https://github.com/mattermost/release-bot",
+      "homepage": "",
+      "size": 5112,
+      "stargazers_count": 0,
+      "watchers_count": 0,
+      "language": null,
+      "has_issues": true,
+      "has_projects": false,
+      "has_downloads": true,
+      "has_wiki": false,
+      "has_pages": false,
+      "forks_count": 0,
+      "mirror_url": null,
+      "archived": false,
+      "disabled": false,
+      "open_issues_count": 1,
+      "license": {
+        "key": "bsd-3-clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "spdx_id": "BSD-3-Clause",
+        "url": "https://api.github.com/licenses/bsd-3-clause",
+        "node_id": "MDc6TGljZW5zZTU="
+      },
+      "allow_forking": true,
+      "is_template": false,
+      "web_commit_signoff_required": true,
+      "topics": [
+  
+      ],
+      "visibility": "public",
+      "forks": 0,
+      "open_issues": 1,
+      "watchers": 0,
+      "default_branch": "main",
+      "stargazers": 0,
+      "master_branch": "main",
+      "organization": "mattermost"
+    },
+    "pusher": {
+      "name": "pfltdv",
+      "email": "mkara@pinchflat.dev"
+    },
+    "organization": {
+      "login": "mattermost",
+      "id": 9828093,
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjk4MjgwOTM=",
+      "url": "https://api.github.com/orgs/mattermost",
+      "repos_url": "https://api.github.com/orgs/mattermost/repos",
+      "events_url": "https://api.github.com/orgs/mattermost/events",
+      "hooks_url": "https://api.github.com/orgs/mattermost/hooks",
+      "issues_url": "https://api.github.com/orgs/mattermost/issues",
+      "members_url": "https://api.github.com/orgs/mattermost/members{/member}",
+      "public_members_url": "https://api.github.com/orgs/mattermost/public_members{/member}",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9828093?v=4",
+      "description": "Mattermost is an open source platform for secure collaboration across the entire software development lifecycle."
+    },
+    "enterprise": {
+      "id": 11247,
+      "slug": "mattermost",
+      "name": "Mattermost, Inc.",
+      "node_id": "E_kgDNK-8",
+      "avatar_url": "https://avatars.githubusercontent.com/b/11247?v=4",
+      "description": "",
+      "website_url": "https://mattermost.com",
+      "html_url": "https://github.com/enterprises/mattermost",
+      "created_at": "2022-01-26T10:19:32Z",
+      "updated_at": "2022-06-30T08:00:03Z"
+    },
+    "sender": {
+      "login": "pfltdv",
+      "id": 98656635,
+      "node_id": "U_kgDOBeFhew",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98656635?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/pfltdv",
+      "html_url": "https://github.com/pfltdv",
+      "followers_url": "https://api.github.com/users/pfltdv/followers",
+      "following_url": "https://api.github.com/users/pfltdv/following{/other_user}",
+      "gists_url": "https://api.github.com/users/pfltdv/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/pfltdv/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/pfltdv/subscriptions",
+      "organizations_url": "https://api.github.com/users/pfltdv/orgs",
+      "repos_url": "https://api.github.com/users/pfltdv/repos",
+      "events_url": "https://api.github.com/users/pfltdv/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/pfltdv/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "installation": {
+      "id": 28579677,
+      "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uMjg1Nzk2Nzc="
+    },
+    "created": false,
+    "deleted": false,
+    "forced": true,
+    "base_ref": null,
+    "compare": "https://github.com/mattermost/release-bot/compare/e2607367d899...e849bae468c9",
+    "commits": [
+      {
+        "id": "6383670c2594cd4ce899fa8269de7f9ee2ec854e",
+        "tree_id": "49508cb6bd31d4f195bea2a60d2553749e3b0149",
+        "distinct": true,
+        "message": "Configure gitignore file\n\nSigned-off-by: Mustafa Kara <mustafa.kara@mattermost.com>",
+        "timestamp": "2022-08-26T09:48:20+03:00",
+        "url": "https://github.com/mattermost/release-bot/commit/6383670c2594cd4ce899fa8269de7f9ee2ec854e",
+        "author": {
+          "name": "Mustafa Kara",
+          "email": "mustafa.kara@mattermost.com",
+          "username": "pfltdv"
+        },
+        "committer": {
+          "name": "Mustafa Kara",
+          "email": "mustafa.kara@mattermost.com",
+          "username": "pfltdv"
+        },
+        "added": [
+  
+        ],
+        "removed": [
+  
+        ],
+        "modified": [
+          ".gitignore"
+        ]
+      },
+      {
+        "id": "2dce2a36d29e36448063e96b63f325ac585b99ab",
+        "tree_id": "82708113639c7bfc25b9f8c00c95356f760d5cbb",
+        "distinct": true,
+        "message": "Create ci pipelines and makefile\n\nSigned-off-by: Mustafa Kara <mustafa.kara@mattermost.com>",
+        "timestamp": "2022-08-26T09:48:56+03:00",
+        "url": "https://github.com/mattermost/release-bot/commit/2dce2a36d29e36448063e96b63f325ac585b99ab",
+        "author": {
+          "name": "Mustafa Kara",
+          "email": "mustafa.kara@mattermost.com",
+          "username": "pfltdv"
+        },
+        "committer": {
+          "name": "Mustafa Kara",
+          "email": "mustafa.kara@mattermost.com",
+          "username": "pfltdv"
+        },
+        "added": [
+          ".github/workflows/build.yaml",
+          ".golangci.yml",
+          "Makefile",
+          "build/Dockerfile"
+        ],
+        "removed": [
+  
+        ],
+        "modified": [
+  
+        ]
+      },
+      {
+        "id": "e849bae468c92cc43a4bd18e8985a12ba06d7d64",
+        "tree_id": "398ad22d028bcf1288c96e9a327c699a38da2ab1",
+        "distinct": true,
+        "message": "Implement release bot first version for pr and branch workflow_run events.\n\nSigned-off-by: Mustafa Kara <mustafa.kara@mattermost.com>",
+        "timestamp": "2022-08-26T09:49:49+03:00",
+        "url": "https://github.com/mattermost/release-bot/commit/e849bae468c92cc43a4bd18e8985a12ba06d7d64",
+        "author": {
+          "name": "Mustafa Kara",
+          "email": "mustafa.kara@mattermost.com",
+          "username": "pfltdv"
+        },
+        "committer": {
+          "name": "Mustafa Kara",
+          "email": "mustafa.kara@mattermost.com",
+          "username": "pfltdv"
+        },
+        "added": [
+          "client/client_creator.go",
+          "config/config.go",
+          "config/config_test.go",
+          "config/testdata/config_sample.yaml",
+          "go.mod",
+          "go.sum",
+          "main.go",
+          "model/event_context.go",
+          "model/event_context_test.go",
+          "model/testdata/workflow_run_event_branch.json",
+          "model/testdata/workflow_run_event_pr.json",
+          "model/testdata/workflow_run_event_tag.json",
+          "model/workflow_run_event_context.go",
+          "model/workflow_run_event_context_test.go",
+          "server/check_run_create_hander.go",
+          "server/check_run_create_handler_test.go",
+          "server/check_run_update_hander.go",
+          "server/check_run_update_handler_test.go",
+          "server/github_hook_handler.go",
+          "server/github_hook_handler_test.go",
+          "server/health_handler.go",
+          "server/health_handler_test.go",
+          "server/scheduler.go",
+          "server/scheduler_test.go",
+          "server/server.go",
+          "server/testdata/check_run_request.json",
+          "server/testdata/check_run_update_request.json",
+          "server/testdata/workflow_run_event_pr.json",
+          "store/event_context_store.go",
+          "store/event_context_store_test.go",
+          "store/testdata/workflow_run_event.json",
+          "version/version.go"
+        ],
+        "removed": [
+  
+        ],
+        "modified": [
+  
+        ]
+      }
+    ],
+    "head_commit": {
+      "id": "e849bae468c92cc43a4bd18e8985a12ba06d7d64",
+      "tree_id": "398ad22d028bcf1288c96e9a327c699a38da2ab1",
+      "distinct": true,
+      "message": "Implement release bot first version for pr and branch workflow_run events.\n\nSigned-off-by: Mustafa Kara <mustafa.kara@mattermost.com>",
+      "timestamp": "2022-08-26T09:49:49+03:00",
+      "url": "https://github.com/mattermost/release-bot/commit/e849bae468c92cc43a4bd18e8985a12ba06d7d64",
+      "author": {
+        "name": "Mustafa Kara",
+        "email": "mustafa.kara@mattermost.com",
+        "username": "pfltdv"
+      },
+      "committer": {
+        "name": "Mustafa Kara",
+        "email": "mustafa.kara@mattermost.com",
+        "username": "pfltdv"
+      },
+      "added": [
+        "client/client_creator.go",
+        "config/config.go",
+        "config/config_test.go",
+        "config/testdata/config_sample.yaml",
+        "go.mod",
+        "go.sum",
+        "main.go",
+        "model/event_context.go",
+        "model/event_context_test.go",
+        "model/testdata/workflow_run_event_branch.json",
+        "model/testdata/workflow_run_event_pr.json",
+        "model/testdata/workflow_run_event_tag.json",
+        "model/workflow_run_event_context.go",
+        "model/workflow_run_event_context_test.go",
+        "server/check_run_create_hander.go",
+        "server/check_run_create_handler_test.go",
+        "server/check_run_update_hander.go",
+        "server/check_run_update_handler_test.go",
+        "server/github_hook_handler.go",
+        "server/github_hook_handler_test.go",
+        "server/health_handler.go",
+        "server/health_handler_test.go",
+        "server/scheduler.go",
+        "server/scheduler_test.go",
+        "server/server.go",
+        "server/testdata/check_run_request.json",
+        "server/testdata/check_run_update_request.json",
+        "server/testdata/workflow_run_event_pr.json",
+        "store/event_context_store.go",
+        "store/event_context_store_test.go",
+        "store/testdata/workflow_run_event.json",
+        "version/version.go"
+      ],
+      "removed": [
+  
+      ],
+      "modified": [
+  
+      ]
+    }
+  }

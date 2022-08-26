@@ -27,7 +27,16 @@ type EventContext interface {
 type payloadToEventContextConverter func(payload []byte) (EventContext, error)
 
 var eventContextConverters map[string]payloadToEventContextConverter = map[string]payloadToEventContextConverter{
+	"push":         pushEventMapper,
 	"workflow_run": workflowRunEventMapper,
+}
+
+func pushEventMapper(payload []byte) (EventContext, error) {
+	var event github.PushEvent
+	if err := json.Unmarshal(payload, &event); err != nil {
+		return nil, err
+	}
+	return newPushEventContext(&event), nil
 }
 
 func workflowRunEventMapper(payload []byte) (EventContext, error) {
