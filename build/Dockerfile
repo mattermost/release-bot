@@ -15,7 +15,7 @@ RUN make go-build
 
 # Cause of bash plugins we need to execute bash and shell commands.
 FROM gcr.io/distroless/static-debian11@sha256:35817ff4e3441ebfa430cfca98121e43cbf4a134412285c2460a9464c97ac2ca as runner
-COPY --from=builder /src/dist/release-bot-linux-amd64 /opt/release-bot/bin/release-bot
+COPY --from=builder /src/dist/release_bot-linux-amd64 /opt/release-bot/bin/release-bot
 
 # We should refrain from running as privileged user
 # Run as UID for nobody

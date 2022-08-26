@@ -157,6 +157,7 @@ go-build/%:
 	export GOARCH="$${platform#*-}"; \
 	echo export GOOS=$${GOOS}; \
 	echo export GOARCH=$${GOARCH}; \
+	CGO_ENABLED=0 \
 	$(GO) build ${GO_BUILD_OPTS} \
 	-ldflags '${GO_LDFLAGS}' \
 	-o ${GO_OUT_BIN_DIR}/$* \
