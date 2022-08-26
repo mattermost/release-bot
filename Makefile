@@ -52,7 +52,7 @@ GO_LDFLAGS                   += -X "github.com/mattermost/${APP_NAME}/version.ve
 GO_LDFLAGS                   += -X "github.com/mattermost/${APP_NAME}/version.buildDate=$(BUILD_DATE)"
 GO_LDFLAGS                   += -X "github.com/mattermost/${APP_NAME}/service.goVersion=$(GO_VERSION)"
 # Architectures to build for
-GO_BUILD_PLATFORMS           ?= linux-amd64
+GO_BUILD_PLATFORMS           ?= linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 freebsd-amd64
 GO_BUILD_PLATFORMS_ARTIFACTS = $(foreach cmd,$(addprefix go-build/,$(subst -,_,${APP_NAME})),$(addprefix $(cmd)-,$(GO_BUILD_PLATFORMS)))
 # Build options
 GO_BUILD_OPTS                += -mod=readonly -trimpath
