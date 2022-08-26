@@ -10,7 +10,7 @@
       "run_number": 41,
       "event": "pull_request",
       "status": "queued",
-      "conclusion": null,
+      "conclusion": "queued",
       "workflow_id": 32723309,
       "check_suite_id": 7978151382,
       "check_suite_node_id": "CS_kwDOH1Zdtc8AAAAB24jt1g",
