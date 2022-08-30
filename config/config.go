@@ -24,7 +24,6 @@ type QueueConfig struct {
 	Workers int `mapstructure:"workers"`
 }
 type GithubConfig struct {
-	ApiURL        string `mapstructure:"api_url"`
 	IntegrationID int64  `mapstructure:"integration_id"`
 	WebhookSecret string `mapstructure:"webhook_secret"`
 	PrivateKey    string `mapstructure:"private_key"`

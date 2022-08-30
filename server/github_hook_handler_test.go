@@ -7,11 +7,43 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-github/v45/github"
 	"github.com/mattermost/release-bot/client"
 	"github.com/mattermost/release-bot/config"
 	"github.com/mattermost/release-bot/store"
+	"github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 )
+
+type (
+	mockClientCache struct {
+	}
+	mockAccessToken struct {
+	}
+)
+
+func (t *mockAccessToken) IsExpired() bool {
+	return false
+}
+func (t *mockAccessToken) GetToken() string {
+	return "gh-12345678"
+}
+func (cc *mockClientCache) Get(installationID int64) (*github.Client, error) {
+	token := "gh-12345678"
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mock.WithRequestMatch(
+			mock.PostAppInstallationsAccessTokensByInstallationId,
+			&github.InstallationToken{
+				Token: &token,
+			},
+		),
+	)
+	return github.NewClient(mockedHTTPClient), nil
+}
+
+func (cc *mockClientCache) CreateToken(installationID int64) (client.AccessToken, error) {
+	return &mockAccessToken{}, nil
+}
 
 func TestGithubHookHandlerFailureCases(t *testing.T) {
 	eventContextStore := store.NewEventContextStore()
@@ -28,7 +60,7 @@ func TestGithubHookHandlerFailureCases(t *testing.T) {
 		},
 	}
 
-	cc, _ := client.NewClientCache(int64(100), "Private Key File")
+	cc, _ := client.NewManager(int64(100), "Private Key File")
 	handler, _ := newGithubHookHandler(cc, config, eventContextStore)
 	t.Run("Missing Event Type", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, githubHandlerDefaultRoute, nil)
@@ -73,7 +105,7 @@ func TestGithubHookHandlerRouteWithNoPipelineTrigger(t *testing.T) {
 		},
 	}
 
-	cc, _ := client.NewClientCache(int64(100), "Private Key File")
+	cc, _ := client.NewManager(int64(100), "Private Key File")
 	handler, _ := newGithubHookHandler(cc, config, eventContextStore)
 
 	request, _ := os.Open("testdata/workflow_run_event_pr.json")

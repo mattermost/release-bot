@@ -18,6 +18,6 @@ func (vh *healthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func newHeathHandler() http.Handler {
+func newHealthHandler() http.Handler {
 	return &healthHandler{}
 }

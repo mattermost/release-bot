@@ -12,7 +12,7 @@ import (
 )
 
 func TestHealthzRoute(t *testing.T) {
-	handler := newHeathHandler()
+	handler := newHealthHandler()
 	req := httptest.NewRequest(http.MethodGet, healthHandlerDefaultRoute, nil)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)

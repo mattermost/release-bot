@@ -14,10 +14,9 @@ import (
 )
 
 const (
-	githubHandlerDefaultRoute  string = "/hook"
-	healthHandlerDefaultRoute  string = "/healthz"
-	createCheckRunDefaultRoute string = "/checkrun/create"
-	updateCheckRunDefaultRoute string = "/checkrun/update"
+	githubHandlerDefaultRoute          string = "/hook"
+	healthHandlerDefaultRoute          string = "/healthz"
+	tokenGenerationHandlerDefaultRoute string = "/token"
 )
 
 type Server interface {
@@ -67,7 +66,7 @@ func (s *server) Stop() error {
 func (s *server) registerHandlers(config *config.Config) error {
 	eventContextStore := store.NewEventContextStore()
 
-	cc, err := client.NewClientCache(
+	cc, err := client.NewManager(
 		config.Github.IntegrationID,
 		config.Github.PrivateKey,
 	)
@@ -81,9 +80,8 @@ func (s *server) registerHandlers(config *config.Config) error {
 		log.WithError(err).Error("Can not create github request scheduler! Check configuration settings.")
 		return err
 	}
-	http.Handle(healthHandlerDefaultRoute, newHeathHandler())
+	http.Handle(healthHandlerDefaultRoute, newHealthHandler())
 	http.Handle(githubHandlerDefaultRoute, githubHookHandler)
-	http.Handle(createCheckRunDefaultRoute, newCheckRunCreateHandler(cc, eventContextStore))
-	http.Handle(updateCheckRunDefaultRoute, newCheckRunUpdateHandler(cc, eventContextStore))
+	http.Handle(tokenGenerationHandlerDefaultRoute, newGithubTokenHandler(cc, eventContextStore))
 	return nil
 }
