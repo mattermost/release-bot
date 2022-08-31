@@ -15,13 +15,17 @@ type githubTokenHandler struct {
 }
 
 type githubTokenRequest struct {
-	BotToken string `json:"bot_token"`
+	BotToken   string `json:"bot_token"`
+	Repository string `json:"repository"`
+	RunID      int64  `json:"run_id"`
 }
 
 func (gtr *githubTokenRequest) Log() {
 	log.WithFields(log.Fields{
-		"type":      "github_token",
-		"bot_token": gtr.BotToken,
+		"type":       "github_token",
+		"bot_token":  gtr.BotToken,
+		"repository": gtr.Repository,
+		"run_id":     gtr.RunID,
 	}).Info("GitHub token request")
 }
 
@@ -43,18 +47,31 @@ func (gh *githubTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	request.Log()
+
 	if request.BotToken == "" {
 		http.Error(w, "Provide Bot Token", http.StatusBadRequest)
 		return
 	}
-
+	if request.Repository == "" {
+		http.Error(w, "Provide Repository", http.StatusBadRequest)
+		return
+	}
+	if request.RunID == 0 {
+		http.Error(w, "Provide Workflow Run ID", http.StatusBadRequest)
+		return
+	}
 	context, err := gh.EventContextStore.Get(request.BotToken)
 	if err != nil {
 		http.Error(w, "Invalid Bot Token", http.StatusBadRequest)
 		return
 	}
-	accessToken, err := gh.ClientManager.CreateToken(context.GetInstallationID())
+	accessToken, err := gh.ClientManager.CreateToken(
+		request.Repository,
+		request.RunID,
+		context.GetInstallationID(),
+	)
 	if err != nil {
 		log.WithError(err).Error("Unable to create GitHub Access Token!")
 		http.Error(w, "Invalid Bot Token", http.StatusInternalServerError)

@@ -26,6 +26,8 @@ func TestGithubTokenHandlerInvalidRequests(t *testing.T) {
 	tests := []test{
 		{testFile: "", httpMethod: http.MethodGet, want: "405 Method Not Allowed"},
 		{testFile: "github_token_request_missing_token.json", httpMethod: http.MethodPost, want: "400 Bad Request"},
+		{testFile: "github_token_request_missing_repo.json", httpMethod: http.MethodPost, want: "400 Bad Request"},
+		{testFile: "github_token_request_missing_run_id.json", httpMethod: http.MethodPost, want: "400 Bad Request"},
 		{testFile: "github_token_request_invalid_token.json", httpMethod: http.MethodPost, want: "400 Bad Request"},
 	}
 

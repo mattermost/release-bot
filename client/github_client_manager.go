@@ -21,10 +21,12 @@ const (
 
 type GithubClientManager interface {
 	Get(installationID int64) (*github.Client, error)
-	CreateToken(installationID int64) (AccessToken, error)
+	CreateToken(repository string, runID int64, installationID int64) (AccessToken, error)
+	RevokeToken(repository string, runID int64) error
 }
 
 type AccessToken interface {
+	GetInstallationID() int64
 	IsExpired() bool
 	GetToken() string
 }
@@ -36,12 +38,13 @@ type clientCache struct {
 	cache              *lru.Cache
 	transport          http.RoundTripper
 	appClient          *github.Client
-	installationTokens map[int64]AccessToken
+	installationTokens map[string]AccessToken
 }
 
 type accessToken struct {
-	token     string
-	expiresAt time.Time
+	installationID int64
+	token          string
+	expiresAt      time.Time
 }
 
 func BuildFromConfig(config *config.Config) (GithubClientManager, error) {
@@ -79,7 +82,7 @@ func New(
 		transport:          transport,
 		userAgent:          userAgent,
 		appClient:          appClient,
-		installationTokens: make(map[int64]AccessToken),
+		installationTokens: make(map[string]AccessToken),
 	}
 }
 
@@ -103,9 +106,15 @@ func (cc *clientCache) Get(installationID int64) (*github.Client, error) {
 	return client, nil
 }
 
-func (cc *clientCache) CreateToken(installationID int64) (AccessToken, error) {
-	token, found := cc.installationTokens[installationID]
-	if found && !token.IsExpired() {
+func (cc *clientCache) CreateToken(repository string, runID int64, installationID int64) (AccessToken, error) {
+	log.WithFields(log.Fields{
+		"repository":      repository,
+		"run_id":          runID,
+		"installation_id": installationID,
+	}).Info("Github Installation Token requested")
+	mapKey := fmt.Sprintf("%s-%v", repository, runID)
+	token, found := cc.installationTokens[mapKey]
+	if found && !token.IsExpired() && token.GetInstallationID() == installationID {
 		log.Info("Using non-expired repository github token")
 		return token, nil
 	}
@@ -113,15 +122,77 @@ func (cc *clientCache) CreateToken(installationID int64) (AccessToken, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "Can not create access token!")
 	}
-	token = newAccessToken(ghToken.GetToken(), ghToken.GetExpiresAt())
-	cc.installationTokens[installationID] = token
+	token = newAccessToken(installationID, ghToken.GetToken(), ghToken.GetExpiresAt())
+	cc.installationTokens[mapKey] = token
 	return token, nil
 }
 
-func newAccessToken(token string, expiresAt time.Time) AccessToken {
+func (cc *clientCache) RevokeToken(repository string, runID int64) error {
+	log.
+		WithFields(log.Fields{
+			"repository": repository,
+			"run_id":     runID,
+		}).
+		Info("Will revoke token for workflow run.")
+	mapKey := fmt.Sprintf("%s-%v", repository, runID)
+	token, found := cc.installationTokens[mapKey]
+	if !found {
+		log.WithFields(log.Fields{
+			"repository": repository,
+			"run_id":     runID,
+		}).Info("No token is created.")
+		return nil
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest("DELETE", "https://api.github.com/installation/token", nil)
+	if err != nil {
+		log.
+			WithFields(log.Fields{
+				"repository": repository,
+				"run_id":     runID,
+			}).
+			WithError(err).
+			Error("Can not create delete token request")
+		return errors.Wrap(err, "Can not create delete token request!")
+	}
+	req.Header.Add("Accept", "application/vnd.github+json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.GetToken()))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.
+			WithFields(log.Fields{
+				"repository": repository,
+				"run_id":     runID,
+			}).
+			WithError(err).
+			Error("Can not invoke delete token request!")
+		return errors.Wrap(err, "Can not invoke delete token request!")
+	}
+	if resp.StatusCode != 204 {
+		log.
+			WithFields(log.Fields{
+				"repository": repository,
+				"run_id":     runID,
+			}).
+			WithError(err).
+			Error("Github Token invalidation error")
+		return errors.New("Token invalidation error!")
+	}
+	log.
+		WithFields(log.Fields{
+			"repository": repository,
+			"run_id":     runID,
+		}).
+		Info("Token invalidated!")
+	return nil
+}
+
+func newAccessToken(installationID int64, token string, expiresAt time.Time) AccessToken {
 	return &accessToken{
-		token:     token,
-		expiresAt: expiresAt,
+		installationID: installationID,
+		token:          token,
+		expiresAt:      expiresAt,
 	}
 }
 
@@ -130,4 +201,7 @@ func (t *accessToken) IsExpired() bool {
 }
 func (t *accessToken) GetToken() string {
 	return t.token
+}
+func (t *accessToken) GetInstallationID() int64 {
+	return t.installationID
 }

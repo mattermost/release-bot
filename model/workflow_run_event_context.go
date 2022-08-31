@@ -7,6 +7,7 @@ import (
 
 type WorkflowRunEventContext struct {
 	event          string
+	action         string
 	repository     string
 	installationID int64
 	workflowRun    *github.WorkflowRun
@@ -16,6 +17,7 @@ func newWorkflowRunEventContext(event github.WorkflowRunEvent) EventContext {
 	workflowRun := event.GetWorkflowRun()
 	return &WorkflowRunEventContext{
 		event:          "workflow_run",
+		action:         event.GetAction(),
 		repository:     event.GetRepo().GetFullName(),
 		installationID: event.GetInstallation().GetID(),
 		workflowRun:    workflowRun,
@@ -25,6 +27,7 @@ func newWorkflowRunEventContext(event github.WorkflowRunEvent) EventContext {
 func (wrec *WorkflowRunEventContext) Log() {
 	log.WithFields(log.Fields{
 		"event":           wrec.GetEvent(),
+		"action":          wrec.GetAction(),
 		"fork":            wrec.IsFork(),
 		"type":            wrec.GetType(),
 		"workflow":        wrec.GetWorkflow(),
@@ -39,6 +42,9 @@ func (wrec *WorkflowRunEventContext) Log() {
 }
 func (wrec *WorkflowRunEventContext) GetEvent() string {
 	return wrec.event
+}
+func (wrec *WorkflowRunEventContext) GetAction() string {
+	return wrec.action
 }
 func (wrec *WorkflowRunEventContext) IsFork() bool {
 	return wrec.workflowRun.GetRepository().GetFullName() != wrec.workflowRun.GetHeadRepository().GetFullName()

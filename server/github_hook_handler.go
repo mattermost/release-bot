@@ -76,6 +76,13 @@ func (gh *githubHookHandler) processEvent(eventType string, deliveryID string, p
 	}
 
 	eventContext.Log()
+
+	if "workflow_run" == eventContext.GetEvent() && "completed" == eventContext.GetAction() {
+		if err := gh.ClientManager.RevokeToken(eventContext.GetRepository(), eventContext.GetWorkflowRunID()); err != nil {
+			log.WithError(err).Error("Error occurred while revoing pipeline token")
+		}
+	}
+
 	pipeline := model.GetTargetPipeline(eventContext, gh.Pipelines)
 
 	if pipeline == nil {

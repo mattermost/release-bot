@@ -1,3 +1,5 @@
 {
-    "bot_token":"1234"
+    "bot_token":"1234",
+    "repository":"repository",
+    "run_id":100
 }

@@ -22,6 +22,9 @@ type (
 	}
 )
 
+func (t *mockAccessToken) GetInstallationID() int64 {
+	return int64(100)
+}
 func (t *mockAccessToken) IsExpired() bool {
 	return false
 }
@@ -41,8 +44,11 @@ func (cc *mockClientCache) Get(installationID int64) (*github.Client, error) {
 	return github.NewClient(mockedHTTPClient), nil
 }
 
-func (cc *mockClientCache) CreateToken(installationID int64) (client.AccessToken, error) {
+func (cc *mockClientCache) CreateToken(repository string, runID int64, installationID int64) (client.AccessToken, error) {
 	return &mockAccessToken{}, nil
+}
+func (cc *mockClientCache) RevokeToken(repository string, runID int64) error {
+	return nil
 }
 
 func TestGithubHookHandlerFailureCases(t *testing.T) {
