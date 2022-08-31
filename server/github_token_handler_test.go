@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,48 +14,53 @@ import (
 )
 
 func TestGithubTokenHandlerInvalidRequests(t *testing.T) {
+	type test struct {
+		testFile   string
+		httpMethod string
+		want       string
+	}
+
 	eventContextStore := store.NewEventContextStore()
 	eventContextStore.Store(createWorkflowRunEvent(t), "12345")
-
 	handler := newGithubTokenHandler(&mockClientCache{}, eventContextStore)
-	t.Run("Method Not Allowed", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, tokenGenerationHandlerDefaultRoute, nil)
+	tests := []test{
+		{testFile: "", httpMethod: http.MethodGet, want: "405 Method Not Allowed"},
+		{testFile: "github_token_request_missing_token.json", httpMethod: http.MethodPost, want: "400 Bad Request"},
+		{testFile: "github_token_request_invalid_token.json", httpMethod: http.MethodPost, want: "400 Bad Request"},
+	}
+
+	for _, tc := range tests {
+		var request *os.File
+		if tc.testFile != "" {
+			request, _ = os.Open("testdata/github_token_request_missing_token.json")
+		}
+		req := httptest.NewRequest(tc.httpMethod, tokenGenerationHandlerDefaultRoute, request)
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, req)
 		res := w.Result()
-		assert.Equal(t, "405 Method Not Allowed", res.Status)
-	})
-	t.Run("Missing Token", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, tokenGenerationHandlerDefaultRoute, nil)
-		w := httptest.NewRecorder()
-		handler.ServeHTTP(w, req)
-		res := w.Result()
-		assert.Equal(t, "400 Bad Request", res.Status)
-	})
-	t.Run("Invalid Token", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, tokenGenerationHandlerDefaultRoute+"?token=1234", nil)
-		w := httptest.NewRecorder()
-		handler.ServeHTTP(w, req)
-		res := w.Result()
-		assert.Equal(t, "400 Bad Request", res.Status)
-	})
+		assert.Equal(t, tc.want, res.Status)
+	}
 }
 
 func TestGithubTokenHandler(t *testing.T) {
 	eventContextStore := store.NewEventContextStore()
-	eventContextStore.Store(createWorkflowRunEvent(t), "12345")
+	eventContextStore.Store(createWorkflowRunEvent(t), "bot_token")
 
 	handler := newGithubTokenHandler(&mockClientCache{}, eventContextStore)
-	req := httptest.NewRequest(http.MethodGet, tokenGenerationHandlerDefaultRoute+"?token=12345", nil)
+	request, _ := os.Open("testdata/github_token_request.json")
+	req := httptest.NewRequest(http.MethodPost, tokenGenerationHandlerDefaultRoute, request)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)
 	res := w.Result()
 	assert.Equal(t, "200 OK", res.Status)
 	defer res.Body.Close()
-	assert.Equal(t, "text/plain;charset=utf-8", res.Header.Get("Content-Type"))
+	assert.Equal(t, "application/json;charset=utf-8", res.Header.Get("Content-Type"))
 	data, err := ioutil.ReadAll(res.Body)
 	assert.Nil(t, err)
-	assert.Equal(t, "gh-12345678", string(data))
+	gtr := &githubTokenResponse{}
+	err = json.Unmarshal(data, gtr)
+	assert.Nil(t, err)
+	assert.Equal(t, "gh-12345678", gtr.Token)
 }
 
 func createWorkflowRunEvent(t *testing.T) model.EventContext {
