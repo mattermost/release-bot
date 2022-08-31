@@ -66,11 +66,7 @@ func (s *server) Stop() error {
 func (s *server) registerHandlers(config *config.Config) error {
 	eventContextStore := store.NewEventContextStore()
 
-	cc, err := client.NewManager(
-		config.Github.IntegrationID,
-		config.Github.PrivateKey,
-	)
-
+	cc, err := client.BuildFromConfig(config)
 	if err != nil {
 		log.WithError(err).Error("Can not create github client creator! Check configuration settings.")
 		return err

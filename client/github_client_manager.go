@@ -9,13 +9,14 @@ import (
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v45/github"
 	lru "github.com/hashicorp/golang-lru"
+	"github.com/mattermost/release-bot/config"
 	"github.com/mattermost/release-bot/version"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	ClientCacheSize = 64
+	ClientCacheSize = 128
 )
 
 type GithubClientManager interface {
@@ -43,26 +44,43 @@ type accessToken struct {
 	expiresAt time.Time
 }
 
-func NewManager(appID int64, privateKeyFile string) (GithubClientManager, error) {
+func BuildFromConfig(config *config.Config) (GithubClientManager, error) {
 	cache, err := lru.New(ClientCacheSize)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create cache")
 	}
 	version := version.Full()
-	itr, err := ghinstallation.NewAppsTransportKeyFromFile(http.DefaultTransport, appID, privateKeyFile)
+	itr, err := ghinstallation.NewAppsTransportKeyFromFile(http.DefaultTransport, config.Github.IntegrationID, config.Github.PrivateKey)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Can not initialize GitHub client! Check configuration values.")
 	}
+	return New(
+		config.Github.IntegrationID,
+		config.Github.PrivateKey,
+		cache,
+		http.DefaultTransport,
+		fmt.Sprintf("%s/%s", version.Name, version.Version),
+		github.NewClient(&http.Client{Transport: itr}),
+	), nil
+}
 
+func New(
+	appID int64,
+	privateKeyFile string,
+	cache *lru.Cache,
+	transport http.RoundTripper,
+	userAgent string,
+	appClient *github.Client,
+) GithubClientManager {
 	return &clientCache{
 		appID:              appID,
 		privateKeyFile:     privateKeyFile,
 		cache:              cache,
-		transport:          http.DefaultTransport,
-		userAgent:          fmt.Sprintf("%s/%s", version.Name, version.Version),
-		appClient:          github.NewClient(&http.Client{Transport: itr}),
+		transport:          transport,
+		userAgent:          userAgent,
+		appClient:          appClient,
 		installationTokens: make(map[int64]AccessToken),
-	}, nil
+	}
 }
 
 func (cc *clientCache) Get(installationID int64) (*github.Client, error) {

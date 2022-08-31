@@ -49,6 +49,8 @@ func TestGithubHookHandlerFailureCases(t *testing.T) {
 	eventContextStore := store.NewEventContextStore()
 	config := &config.Config{
 		Github: config.GithubConfig{
+			IntegrationID: int64(100),
+			PrivateKey:    "Private Key File",
 			WebhookSecret: "ABC",
 		},
 		Queue: config.QueueConfig{
@@ -60,7 +62,7 @@ func TestGithubHookHandlerFailureCases(t *testing.T) {
 		},
 	}
 
-	cc, _ := client.NewManager(int64(100), "Private Key File")
+	cc, _ := client.BuildFromConfig(config)
 	handler, _ := newGithubHookHandler(cc, config, eventContextStore)
 	t.Run("Missing Event Type", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, githubHandlerDefaultRoute, nil)
@@ -94,6 +96,8 @@ func TestGithubHookHandlerRouteWithNoPipelineTrigger(t *testing.T) {
 	eventContextStore := store.NewEventContextStore()
 	config := &config.Config{
 		Github: config.GithubConfig{
+			IntegrationID: int64(100),
+			PrivateKey:    "Private Key File",
 			WebhookSecret: "",
 		},
 		Queue: config.QueueConfig{
@@ -105,7 +109,7 @@ func TestGithubHookHandlerRouteWithNoPipelineTrigger(t *testing.T) {
 		},
 	}
 
-	cc, _ := client.NewManager(int64(100), "Private Key File")
+	cc, _ := client.BuildFromConfig(config)
 	handler, _ := newGithubHookHandler(cc, config, eventContextStore)
 
 	request, _ := os.Open("testdata/workflow_run_event_pr.json")
