@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-github/v45/github"
+	"github.com/google/uuid"
 	"github.com/mattermost/release-bot/client"
 	"github.com/mattermost/release-bot/config"
 	"github.com/mattermost/release-bot/model"
@@ -18,7 +19,7 @@ type githubHookHandler struct {
 	WebhookSecret     []byte
 	Pipelines         []config.PipelineConfig
 	BaseURL           string
-	ClientCache       client.ClientCache
+	ClientManager     client.GithubClientManager
 	EventContextStore store.EventContextStore
 	Scheduler         Scheduler
 }
@@ -52,7 +53,7 @@ func (gh *githubHookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func newGithubHookHandler(cc client.ClientCache, config *config.Config, eventContextStore store.EventContextStore) (http.Handler, error) {
+func newGithubHookHandler(cc client.GithubClientManager, config *config.Config, eventContextStore store.EventContextStore) (http.Handler, error) {
 	scheduler, err := NewGithubEventScheduler(config.Queue.Limit, config.Queue.Workers)
 	if err != nil {
 		return nil, errors.Wrap(err, "Scheduler error!")
@@ -61,7 +62,7 @@ func newGithubHookHandler(cc client.ClientCache, config *config.Config, eventCon
 		WebhookSecret:     []byte(config.Github.WebhookSecret),
 		Pipelines:         config.Pipelines,
 		BaseURL:           config.Server.BaseURL,
-		ClientCache:       cc,
+		ClientManager:     cc,
 		EventContextStore: eventContextStore,
 		Scheduler:         scheduler,
 	}, nil
@@ -75,6 +76,13 @@ func (gh *githubHookHandler) processEvent(eventType string, deliveryID string, p
 	}
 
 	eventContext.Log()
+
+	if "workflow_run" == eventContext.GetEvent() && "completed" == eventContext.GetAction() {
+		if err := gh.ClientManager.RevokeToken(eventContext.GetRepository(), eventContext.GetWorkflowRunID()); err != nil {
+			log.WithError(err).Error("Error occurred while revoing pipeline token")
+		}
+	}
+
 	pipeline := model.GetTargetPipeline(eventContext, gh.Pipelines)
 
 	if pipeline == nil {
@@ -101,7 +109,7 @@ func (h *githubHookHandler) triggerPipeline(ctx context.Context, eventContext mo
 		"workflow": pipeline.Workflow,
 	}).Info("Will trigger pipeline!")
 
-	client, err := h.ClientCache.Get(eventContext.GetInstallationID())
+	client, err := h.ClientManager.Get(eventContext.GetInstallationID())
 
 	if err != nil {
 		log.
@@ -110,7 +118,7 @@ func (h *githubHookHandler) triggerPipeline(ctx context.Context, eventContext mo
 			Error("Can not find installation id at cache!")
 		return err
 	}
-	token := "test"
+	token := uuid.New().String()
 	h.EventContextStore.Store(eventContext, token)
 	inputs := map[string]interface{}{
 		"repository":    eventContext.GetRepository(),

@@ -6,6 +6,7 @@ require (
 	github.com/akyoto/cache v1.0.6
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
 	github.com/google/go-github/v45 v45.2.0
+	github.com/google/uuid v1.1.2
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/migueleliasweb/go-github-mock v0.0.10
 	github.com/pkg/errors v0.9.1

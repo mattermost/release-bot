@@ -10,6 +10,7 @@ import (
 )
 
 type EventContext interface {
+	GetAction() string
 	GetConclusion() string
 	GetEvent() string
 	GetInstallationID() int64

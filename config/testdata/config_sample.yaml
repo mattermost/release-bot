@@ -8,7 +8,6 @@ queue:
   workers: 10
 
 github:
-  api_url: "https://api.github.com"
   integration_id: 12345
   webhook_secret: N/A
   private_key: certs/private_key.pem

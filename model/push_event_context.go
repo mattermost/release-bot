@@ -9,18 +9,21 @@ import (
 
 type PushEventContext struct {
 	event     string
+	action    string
 	pushEvent *github.PushEvent
 }
 
 func newPushEventContext(event *github.PushEvent) EventContext {
 	return &PushEventContext{
 		event:     "push",
+		action:    "push",
 		pushEvent: event,
 	}
 }
 func (pec *PushEventContext) Log() {
 	log.WithFields(log.Fields{
 		"event":           pec.GetEvent(),
+		"action":          pec.GetAction(),
 		"fork":            pec.IsFork(),
 		"type":            pec.GetType(),
 		"workflow":        pec.GetWorkflow(),
@@ -36,6 +39,9 @@ func (pec *PushEventContext) Log() {
 
 func (pec *PushEventContext) GetEvent() string {
 	return pec.event
+}
+func (pec *PushEventContext) GetAction() string {
+	return pec.action
 }
 func (pec *PushEventContext) IsFork() bool {
 	return pec.pushEvent.GetRepo().GetFork()

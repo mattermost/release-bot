@@ -22,7 +22,6 @@ func TestConfiguration(t *testing.T) {
 		config, err := ReadConfig("config_sample", "testdata")
 		assert.NotNil(t, config)
 		assert.Nil(t, err)
-		assert.Equal(t, "https://api.github.com", config.Github.ApiURL)
 		assert.Equal(t, int64(12345), config.Github.IntegrationID)
 		assert.Equal(t, "certs/private_key.pem", config.Github.PrivateKey)
 		assert.Equal(t, "N/A", config.Github.WebhookSecret)

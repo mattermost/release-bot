@@ -8,6 +8,7 @@ import (
 )
 
 type eventContextFixture struct {
+	action     string
 	conclusion string
 	event      string
 	name       string
@@ -19,6 +20,9 @@ type eventContextFixture struct {
 	fork       bool
 }
 
+func (f *eventContextFixture) GetAction() string {
+	return f.action
+}
 func (f *eventContextFixture) GetEvent() string {
 	return f.event
 }
