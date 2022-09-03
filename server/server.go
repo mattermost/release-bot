@@ -8,8 +8,10 @@ import (
 
 	"github.com/mattermost/release-bot/client"
 	"github.com/mattermost/release-bot/config"
+	"github.com/mattermost/release-bot/metric"
 	"github.com/mattermost/release-bot/store"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,6 +19,7 @@ const (
 	githubHandlerDefaultRoute          string = "/hook"
 	healthHandlerDefaultRoute          string = "/healthz"
 	tokenGenerationHandlerDefaultRoute string = "/token"
+	metricsHandlerDetaultRoute         string = "/metrics"
 )
 
 type Server interface {
@@ -48,6 +51,7 @@ func (s *server) Start(ctx context.Context) error {
 		"address": config.Server.Address,
 		"port":    config.Server.Port,
 	}).Info("Starting release bot server...")
+	metric.RegisterMetrics()
 	s.server = &http.Server{Addr: fmt.Sprintf("%s:%d", config.Server.Address, config.Server.Port)}
 	log.Info("Server Started")
 
@@ -79,5 +83,6 @@ func (s *server) registerHandlers(config *config.Config) error {
 	http.Handle(healthHandlerDefaultRoute, newHealthHandler())
 	http.Handle(githubHandlerDefaultRoute, githubHookHandler)
 	http.Handle(tokenGenerationHandlerDefaultRoute, newGithubTokenHandler(cc, eventContextStore))
+	http.Handle(metricsHandlerDetaultRoute, promhttp.Handler())
 	return nil
 }

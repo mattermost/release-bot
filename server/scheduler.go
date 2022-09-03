@@ -1,6 +1,9 @@
 package server
 
-import "github.com/pkg/errors"
+import (
+	"github.com/mattermost/release-bot/metric"
+	"github.com/pkg/errors"
+)
 
 type GithubEventProcessor func(eventType string, deliveryID string, payload []byte)
 
@@ -32,7 +35,10 @@ func NewGithubEventScheduler(queueSize int, workers int) (Scheduler, error) {
 	for i := 0; i < workers; i++ {
 		go func() {
 			for d := range s.queue {
+				metric.DecreaseGauge(metric.QueuedRequests)
+				metric.IncreaseGauge(metric.ActiveWorkers)
 				d.Processor(d.EventType, d.DeliveryID, d.Payload)
+				metric.DecreaseGauge(metric.ActiveWorkers)
 			}
 		}()
 	}
@@ -41,5 +47,6 @@ func NewGithubEventScheduler(queueSize int, workers int) (Scheduler, error) {
 }
 
 func (s *scheduler) Schedule(d dispatch) {
+	metric.IncreaseGauge(metric.QueuedRequests)
 	s.queue <- d
 }
