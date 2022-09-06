@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-github/v45/github"
 	"github.com/mattermost/release-bot/client"
 	"github.com/mattermost/release-bot/config"
+	"github.com/mattermost/release-bot/metric"
 	"github.com/mattermost/release-bot/store"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
@@ -51,6 +52,9 @@ func (cc *mockClientCache) RevokeToken(repository string, runID int64) error {
 	return nil
 }
 
+func init() {
+	metric.RegisterMetrics()
+}
 func TestGithubHookHandlerFailureCases(t *testing.T) {
 	eventContextStore := store.NewEventContextStore()
 	config := &config.Config{

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mattermost/release-bot/client"
 	"github.com/mattermost/release-bot/config"
+	"github.com/mattermost/release-bot/metric"
 	"github.com/mattermost/release-bot/model"
 	"github.com/mattermost/release-bot/store"
 	"github.com/pkg/errors"
@@ -25,20 +26,24 @@ type githubHookHandler struct {
 }
 
 func (gh *githubHookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	metric.IncreaseCounter(metric.GithubHookCount, metric.TotalRequestCount)
 	eventType := r.Header.Get("X-GitHub-Event")
 	deliveryID := r.Header.Get("X-GitHub-Delivery")
 
 	if eventType == "" {
 		http.Error(w, "Missing Event Type", http.StatusBadRequest)
+		metric.IncreaseCounter(metric.TotalFailureCount)
 		return
 	}
 	if deliveryID == "" {
 		http.Error(w, "Missing Delivery Id", http.StatusBadRequest)
+		metric.IncreaseCounter(metric.TotalFailureCount)
 		return
 	}
 	payload, err := github.ValidatePayload(r, gh.WebhookSecret)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		metric.IncreaseCounter(metric.TotalFailureCount)
 		return
 	}
 
@@ -51,6 +56,7 @@ func (gh *githubHookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
+	metric.IncreaseCounter(metric.TotalSuccessCount)
 }
 
 func newGithubHookHandler(cc client.GithubClientManager, config *config.Config, eventContextStore store.EventContextStore) (http.Handler, error) {
@@ -74,12 +80,16 @@ func (gh *githubHookHandler) processEvent(eventType string, deliveryID string, p
 		log.WithError(err).Error("Error occurred while deserializing request")
 		return
 	}
-
+	if eventContext.GetType() == "tag" {
+		metric.IncreaseCounter(metric.TagRequestCount)
+	} else {
+		metric.IncreaseCounter(metric.BranchRequestCount)
+	}
 	eventContext.Log()
 
 	if "workflow_run" == eventContext.GetEvent() && "completed" == eventContext.GetAction() {
 		if err := gh.ClientManager.RevokeToken(eventContext.GetRepository(), eventContext.GetWorkflowRunID()); err != nil {
-			log.WithError(err).Error("Error occurred while revoing pipeline token")
+			log.WithError(err).Error("Error occurred while revoking pipeline token")
 		}
 	}
 
