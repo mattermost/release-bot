@@ -46,6 +46,7 @@ DOCKER_IMAGE_GOLINT     ?= "golangci/golangci-lint:v1.45.2@sha256:e84b639c061c88
 DOCKER_IMAGE_DOCKERLINT ?= "hadolint/hadolint:v2.9.2@sha256:d355bd7df747a0f124f3b5e7b21e9dafd0cb19732a276f901f0fdee243ec1f3b"
 DOCKER_IMAGE_GH_CLI     ?= "registry.internal.mattermost.com/images/build-ci:3.16.0@sha256:f6a229a9ababef3c483f237805ee4c3dbfb63f5de4fbbf58f4c4b6ed8fcd34b6"
 DOCKER_IMAGE_NOTICE     ?= "mattermost/notice-file-generator:v0.0.2@sha256:6989b5c1c0b63e33206ac7a4407fd234d4032eed21cabb4ab41fe870b33e7c2d"
+DOCKER_IMAGE_COSIGN     += "bitnami/cosign:1.8.0@sha256:8c2c61c546258fffff18b47bb82a65af6142007306b737129a7bd5429d53629a"
 
 ## Cosign Variables
 # The public key
