@@ -34,12 +34,26 @@ DOCKER                  := $(shell which docker)
 DOCKER_FILE             += ./build/Dockerfile
 # Docker options to inherit for all docker run commands
 DOCKER_OPTS             += --rm -u $$(id -u):$$(id -g) --platform "linux/amd64"
+# Registry to upload images
+DOCKER_REGISTRY         ?= docker.io
+DOCKER_REGISTRY_REPO    ?= mattermost/${APP_NAME}-daily
+# Registry credentials
+DOCKER_USER             ?= user
+DOCKER_PASSWORD         ?= password
 ## Docker Images
-DOCKER_IMAGE_GO         ?= "golang:1.18@sha256:90c06f42c1aa2b6b96441c0e6192aff48815cf5e7950cd661ed316fdbfb06ed4"
+DOCKER_IMAGE_GO         ?= "golang:${GO_VERSION}@sha256:90c06f42c1aa2b6b96441c0e6192aff48815cf5e7950cd661ed316fdbfb06ed4"
 DOCKER_IMAGE_GOLINT     ?= "golangci/golangci-lint:v1.45.2@sha256:e84b639c061c8888be91939c78dae9b1525359954e405ab0d9868a46861bd21b"
 DOCKER_IMAGE_DOCKERLINT ?= "hadolint/hadolint:v2.9.2@sha256:d355bd7df747a0f124f3b5e7b21e9dafd0cb19732a276f901f0fdee243ec1f3b"
 DOCKER_IMAGE_GH_CLI     ?= "registry.internal.mattermost.com/images/build-ci:3.16.0@sha256:f6a229a9ababef3c483f237805ee4c3dbfb63f5de4fbbf58f4c4b6ed8fcd34b6"
 DOCKER_IMAGE_NOTICE     ?= "mattermost/notice-file-generator:v0.0.2@sha256:6989b5c1c0b63e33206ac7a4407fd234d4032eed21cabb4ab41fe870b33e7c2d"
+
+## Cosign Variables
+# The public key
+COSIGN_PUBLIC_KEY       ?= akey
+# The private key
+COSIGN_KEY              ?= akey
+# The passphrase used to decrypt the private key
+COSIGN_PASSWORD         ?= password
 
 ## Go Variables
 # Go executable
@@ -60,7 +74,13 @@ GO_TEST_OPTS                 += -mod=readonly -failfast -race -cover
 # Temporary folder to output compiled binaries artifacts
 GO_OUT_BIN_DIR               := ./dist
 
-GO_RUN_ARGS					 ?= ""
+## Github Variables
+# A github access token that provides access to upload artifacts under releases
+GITHUB_TOKEN                 ?= a_token
+# Github organization
+GITHUB_ORG                   := mattermost
+# Most probably the name of the repo
+GITHUB_REPO                  := ${APP_NAME}
 
 # ====================================================================================
 # Colors
@@ -94,10 +114,6 @@ AT_1 :=
 AT = $(AT_$(VERBOSE))
 
 # ====================================================================================
-# Functions
-
-
-# ====================================================================================
 # Targets
 
 help: ## to get help
@@ -108,6 +124,14 @@ help: ## to get help
 .PHONY: build
 build: go-build-docker ## to build
 
+.PHONY: release
+release: build github-release ## to build and release artifacts
+
+.PHONY: package
+package: docker-login docker-build docker-push ## to build, package and push the artifact to a container registry
+
+.PHONY: sign
+sign: docker-sign docker-verify ## to sign the artifact and perform verification
 
 .PHONY: lint
 lint: go-lint docker-lint ## to lint
@@ -123,6 +147,78 @@ docker-build: ## to build the docker image
 	-f ${DOCKER_FILE} . \
 	-t ${APP_NAME}:${APP_VERSION} || ${FAIL}
 	@$(OK) Performing Docker build ${APP_NAME}:${APP_VERSION}
+
+.PHONY: docker-push
+docker-push: ## to push the docker image
+	@$(INFO) Pushing to registry...
+	$(AT)$(DOCKER) tag ${APP_NAME}:${APP_VERSION} $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:${APP_VERSION} || ${FAIL}
+	$(AT)$(DOCKER) push $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:${APP_VERSION} || ${FAIL}
+# if we are on a latest semver APP_VERSION tag, also push latest
+ifneq ($(shell echo $(APP_VERSION) | egrep '^v([0-9]+\.){0,2}(\*|[0-9]+)'),)
+  ifeq ($(shell git tag -l --sort=v:refname | tail -n1),$(APP_VERSION))
+	$(AT)$(DOCKER) tag ${APP_NAME}:${APP_VERSION} $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:latest || ${FAIL}
+	$(AT)$(DOCKER) push $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:latest || ${FAIL}
+  endif
+endif
+	@$(OK) Pushing to registry $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:${APP_VERSION}
+
+.PHONY: docker-sign
+docker-sign: ## to sign the docker image
+	@$(INFO) Signing the docker image...
+	$(AT)echo "$${COSIGN_KEY}" > cosign.key && \
+	$(DOCKER) run ${DOCKER_OPTS} \
+	--entrypoint '/bin/sh' \
+        -v $(PWD):/app -w /app \
+	-e COSIGN_PASSWORD=${COSIGN_PASSWORD} \
+	-e HOME="/tmp" \
+    ${DOCKER_IMAGE_COSIGN} \
+	-c \
+	"echo Signing... && \
+	cosign login $(DOCKER_REGISTRY) -u ${DOCKER_USER} -p ${DOCKER_PASSWORD} && \
+	cosign sign --key cosign.key $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:${APP_VERSION}" || ${FAIL}
+# if we are on a latest semver APP_VERSION tag, also sign latest tag
+ifneq ($(shell echo $(APP_VERSION) | egrep '^v([0-9]+\.){0,2}(\*|[0-9]+)'),)
+  ifeq ($(shell git tag -l --sort=v:refname | tail -n1),$(APP_VERSION))
+	$(DOCKER) run ${DOCKER_OPTS} \
+	--entrypoint '/bin/sh' \
+        -v $(PWD):/app -w /app \
+	-e COSIGN_PASSWORD=${COSIGN_PASSWORD} \
+	-e HOME="/tmp" \
+	${DOCKER_IMAGE_COSIGN} \
+	-c \
+	"echo Signing... && \
+	cosign login $(DOCKER_REGISTRY) -u ${DOCKER_USER} -p ${DOCKER_PASSWORD} && \
+	cosign sign --key cosign.key $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:latest" || ${FAIL}
+  endif
+endif
+	$(AT)rm -f cosign.key || ${FAIL}
+	@$(OK) Signing the docker image: $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:${APP_VERSION}
+
+.PHONY: docker-verify
+docker-verify: ## to verify the docker image
+	@$(INFO) Verifying the published docker image...
+	$(AT)echo "$${COSIGN_PUBLIC_KEY}" > cosign_public.key && \
+	$(DOCKER) run ${DOCKER_OPTS} \
+	--entrypoint '/bin/sh' \
+	-v $(PWD):/app -w /app \
+	${DOCKER_IMAGE_COSIGN} \
+	-c \
+	"echo Verifying... && \
+	cosign verify --key cosign_public.key $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:${APP_VERSION}" || ${FAIL}
+# if we are on a latest semver APP_VERSION tag, also verify latest tag
+ifneq ($(shell echo $(APP_VERSION) | egrep '^v([0-9]+\.){0,2}(\*|[0-9]+)'),)
+  ifeq ($(shell git tag -l --sort=v:refname | tail -n1),$(APP_VERSION))
+	$(DOCKER) run ${DOCKER_OPTS} \
+	--entrypoint '/bin/sh' \
+	-v $(PWD):/app -w /app \
+	${DOCKER_IMAGE_COSIGN} \
+	-c \
+	"echo Verifying... && \
+	cosign verify --key cosign_public.key $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:latest" || ${FAIL}
+  endif
+endif
+	$(AT)rm -f cosign_public.key || ${FAIL}
+	@$(OK) Verifying the published docker image: $(DOCKER_REGISTRY)/${DOCKER_REGISTRY_REPO}:${APP_VERSION}
 
 .PHONY: docker-sbom
 docker-sbom: ## to print a sbom report
@@ -143,6 +239,12 @@ docker-lint: ## to lint the Dockerfile
 	${DOCKER_IMAGE_DOCKERLINT} \
 	< ${DOCKER_FILE} || ${FAIL}
 	@$(OK) Dockerfile linting
+
+.PHONY: docker-login
+docker-login: ## to login to a container registry
+	@$(INFO) Dockerd login to container registry ${DOCKER_REGISTRY}...
+	$(AT) echo "${DOCKER_PASSWORD}" | $(DOCKER) login --password-stdin -u ${DOCKER_USER} $(DOCKER_REGISTRY) || ${FAIL}
+	@$(OK) Dockerd login to container registry ${DOCKER_REGISTRY}...
 
 go-build: $(GO_BUILD_PLATFORMS_ARTIFACTS) ## to build binaries
 
@@ -179,7 +281,7 @@ go-build-docker: # to build binaries under a controlled docker dedicated go cont
 .PHONY: go-run
 go-run: ## to run locally for development
 	@$(INFO) running locally...
-	$(AT)$(GO) run ${GO_BUILD_OPTS} ${CONFIG_APP_CODE} -- ${GO_RUN_ARGS} || ${FAIL}
+	$(AT)$(GO) run ${GO_BUILD_OPTS} ${CONFIG_APP_CODE} || ${FAIL}
 	@$(OK) running locally
 
 .PHONY: go-test
@@ -218,7 +320,7 @@ go-lint: ## to lint go code
 	-e GOCACHE="/tmp" \
 	-e GOLANGCI_LINT_CACHE="/tmp" \
 	${DOCKER_IMAGE_GOLINT} \
-	golangci-lint run -v -c /app/.golangci.yml  ./... || ${FAIL}
+	golangci-lint run ./... || ${FAIL}
 	@$(OK) App linting
 
 .PHONY: go-fmt
@@ -232,12 +334,6 @@ go-doc: ## to generate documentation
 	@$(INFO) Generating Documentation...
 	$(AT)$(GO) run ./scripts/env_config.go ./docs/env_config.md || ${FAIL}
 	@$(OK) Generating Documentation
-
-.PHONY: clean
-clean: ## to clean-up
-	@$(INFO) cleaning /${GO_OUT_BIN_DIR} folder...
-	$(AT)rm -rf ${GO_OUT_BIN_DIR} || ${FAIL}
-	@$(OK) cleaning /${GO_OUT_BIN_DIR} folder
 
 .PHONY: generate-notice-file
 generate-notice-file: ## Generate Notice.txt from dependencies
@@ -253,5 +349,27 @@ else
 	-c /tmp/$(GITHUB_REPO)/.config/notice-file/config.yaml \
 	-p /tmp/$(GITHUB_REPO) \
 	-t $(GITHUB_TOKEN) || ${FAIL}
-	@$(OK) Notice.txt is generated!
+	@$(OK) Generating Notice.txt
 endif
+
+.PHONY: github-release
+github-release: ## to publish a release and relevant artifacts to GitHub
+	@$(INFO) Generating github-release http://github.com/$(GITHUB_ORG)/$(GITHUB_REPO)/releases/tag/$(APP_VERSION) ...
+ifeq ($(shell echo $(APP_VERSION) | egrep '^v([0-9]+\.){0,2}(\*|[0-9]+)'),)
+	$(error "We only support releases from semver tags")
+else
+	$(AT)$(DOCKER) run \
+	-v $(PWD):/app -w /app \
+	-e GITHUB_TOKEN=${GITHUB_TOKEN} \
+	$(DOCKER_IMAGE_GH_CLI) \
+	/bin/sh -c \
+	"cd /app && \
+	gh release create $(APP_VERSION) --generate-notes $(GO_OUT_BIN_DIR)/*" || ${FAIL}
+endif
+	@$(OK) Generating github-release http://github.com/$(GITHUB_ORG)/$(GITHUB_REPO)/releases/tag/$(APP_VERSION) ...
+
+.PHONY: clean
+clean: ## to clean-up
+	@$(INFO) cleaning /${GO_OUT_BIN_DIR} folder...
+	$(AT)rm -rf ${GO_OUT_BIN_DIR} || ${FAIL}
+	@$(OK) cleaning /${GO_OUT_BIN_DIR} folder
