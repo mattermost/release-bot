@@ -14,7 +14,7 @@ type healthHandler struct {
 
 func (vh *healthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	metric.IncreaseCounter(metric.HealthRequestCount, metric.TotalRequestCount)
-	log.Info("Version Request is received!")
+	log.Debug("Version Request is received!")
 	response, _ := json.MarshalIndent(version.Full(), "", "  ")
 	w.Header().Add("Content-Type", "application/json;charset=utf-8")
 	w.Write(response)

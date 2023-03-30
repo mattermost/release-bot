@@ -20,6 +20,7 @@ func newPushEventContext(event *github.PushEvent) EventContext {
 		pushEvent: event,
 	}
 }
+
 func (pec *PushEventContext) Log() {
 	log.WithFields(log.Fields{
 		"event":           pec.GetEvent(),

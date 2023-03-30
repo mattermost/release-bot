@@ -40,47 +40,64 @@ func (wrec *WorkflowRunEventContext) Log() {
 		"sha":             wrec.GetCommitHash(),
 	}).Info("Workflow Run Event!")
 }
+
 func (wrec *WorkflowRunEventContext) GetEvent() string {
 	return wrec.event
 }
+
 func (wrec *WorkflowRunEventContext) GetAction() string {
+	// Can be one of completed in_progress requested
 	return wrec.action
 }
+
 func (wrec *WorkflowRunEventContext) IsFork() bool {
 	return wrec.workflowRun.GetRepository().GetFullName() != wrec.workflowRun.GetHeadRepository().GetFullName()
 }
 
 func (wrec *WorkflowRunEventContext) GetType() string {
-	if wrec.workflowRun.GetEvent() == "pull_request" {
-		return "pr"
+
+	switch wrec.workflowRun.GetEvent() {
+	case "push":
+		if wrec.workflowRun.GetHeadBranch() != "" {
+			return "branch"
+		}
+		return "tag"
+	default:
+		return wrec.workflowRun.GetEvent()
 	}
-	if wrec.workflowRun.GetEvent() == "push" && wrec.workflowRun.GetHeadBranch() != "" {
-		return "branch"
-	}
-	return "tag"
+
 }
 
 func (wrec *WorkflowRunEventContext) GetWorkflow() string {
 	return wrec.workflowRun.GetName()
 }
+
 func (wrec *WorkflowRunEventContext) GetWorkflowRunID() int64 {
 	return wrec.workflowRun.GetID()
 }
+
 func (wrec *WorkflowRunEventContext) GetConclusion() string {
+	// Can be one of: success, failure, neutral, cancelled, timed_out, action_required, stale, null, skipped, startup_failure
 	return wrec.workflowRun.GetConclusion()
 }
+
 func (wrec *WorkflowRunEventContext) GetStatus() string {
+	// Can be one of: requested, in_progress, completed, queued, pending, waiting
 	return wrec.workflowRun.GetStatus()
 }
+
 func (wrec *WorkflowRunEventContext) GetRepository() string {
 	return wrec.repository
 }
+
 func (wrec *WorkflowRunEventContext) GetName() string {
 	return wrec.workflowRun.GetHeadBranch()
 }
+
 func (wrec *WorkflowRunEventContext) GetInstallationID() int64 {
 	return wrec.installationID
 }
+
 func (wrec *WorkflowRunEventContext) GetCommitHash() string {
 	return wrec.workflowRun.GetHeadSHA()
 }

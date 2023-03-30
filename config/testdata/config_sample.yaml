@@ -16,10 +16,14 @@ pipelines:
   - organization: mattermost
     repository: "******"
     workflow: docker.yaml
+    targetBranch: master
+    context: ee/github
+    timeout: 1h
     conditions:
       - repository: "^mattermost/.*$"
-        webhook: [ workflow_run ] 
-        workflow: "Build"
-        type: "pr"
-        status: "completed"
-        conclusion: "success"
+        webhook:
+          - workflow_run
+        workflow: test
+        type: pull_request
+        status: completed
+        conlusion: success

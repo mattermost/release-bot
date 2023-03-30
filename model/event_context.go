@@ -75,30 +75,53 @@ Rules:
 func GetTargetPipeline(context EventContext, pipelines []config.PipelineConfig) *config.PipelineConfig {
 	for _, pipeline := range pipelines {
 		for _, condition := range pipeline.Conditions {
+
+			// Check if webhook conditions allowed match the event from Github
+			// Can be pull_request push workflow_run
 			if !contains(condition.Webhook, context.GetEvent()) {
 				continue
 			}
-			if context.IsFork() && !condition.Fork {
-				continue
-			}
+
+			// Commenting out fork check since we are going to use Github built in functionality to approve workflows for forks
+			// We are going to use only workflow_run events for now in order to be secure
+			// if context.IsFork() && !condition.Fork {
+			// 	fmt.Println(context.IsFork() && !condition.Fork)
+			// 	continue
+			// }
+
+			// Check if type that triggered the webhook matches with the one configured
+			// Can be one of pull_request push tag
 			if condition.Type != context.GetType() {
 				continue
 			}
+
+			// Check if workflow name is the one that want to trigger the workflow
 			if condition.Workflow != "" && condition.Workflow != context.GetWorkflow() {
 				continue
 			}
+
+			// Check if workflow conclusion is the one that is condigured
+			// Can be one of: success, failure, neutral, cancelled, timed_out, action_required, stale, null, skipped, startup_failure
 			if condition.Conclusion != "" && condition.Conclusion != context.GetConclusion() {
 				continue
 			}
+
+			// Check if workflow status is the one that is condigured
+			// Can be one of: requested, in_progress, completed, queued, pending, waiting
 			if condition.Status != "" && condition.Status != context.GetStatus() {
 				continue
 			}
+
+			// Check if the repository that triggered the webhook is allowed
 			if condition.Repository != "" && !isRegexpMatch(condition.Repository, context.GetRepository()) {
 				continue
 			}
-			if condition.Name != "" && !isRegexpMatch(condition.Name, context.GetName()) {
-				continue
-			}
+
+			// We will suspend branch matching for now since we will only allow workflow_run events
+			// if condition.Name != "" && !isRegexpMatch(condition.Name, context.GetName()) {
+			// 	continue
+			// }
+
 			return &pipeline
 		}
 	}
@@ -109,6 +132,7 @@ func isRegexpMatch(rule string, check string) bool {
 	match, _ := regexp.MatchString(rule, check)
 	return match
 }
+
 func contains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
