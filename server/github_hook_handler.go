@@ -60,7 +60,7 @@ func (gh *githubHookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := github.ValidatePayload(r, nil)
+	payload, err := github.ValidatePayload(r, gh.WebhookSecret)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		metric.IncreaseCounter(metric.TotalFailureCount)
