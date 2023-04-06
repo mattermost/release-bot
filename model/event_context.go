@@ -75,7 +75,6 @@ Rules:
 func GetTargetPipeline(context EventContext, pipelines []config.PipelineConfig) *config.PipelineConfig {
 	for _, pipeline := range pipelines {
 		for _, condition := range pipeline.Conditions {
-
 			// Check if webhook conditions allowed match the event from Github
 			// Can be pull_request push workflow_run
 			if !contains(condition.Webhook, context.GetEvent()) {

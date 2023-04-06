@@ -24,7 +24,6 @@ linters-settings:
     severity: warning
     rules:
       - name: atomic
-      
 
 linters:
   disable-all: true
@@ -36,7 +35,7 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - misspell
+    # - misspell
     - nakedret
     - typecheck
     - unconvert

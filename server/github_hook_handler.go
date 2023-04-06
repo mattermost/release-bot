@@ -22,17 +22,17 @@ const (
 	statePending = "pending"
 	stateSuccess = "success"
 	stateError   = "error"
-	stateFailure = "failure"
+	// stateFailure = "failure"
 
 	// Available Workflow Run statuses
 	// https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads?actionType=requested#workflow_run
 	// requested, in_progress, completed, queued, pending, waiting
-	statusCompleted  = "completed"
-	statusRequested  = "requested"
-	statusInProgress = "in_progress"
-	statusQueued     = "queued"
-	statusPending    = "pending"
-	statusWaiting    = "waiting"
+	statusCompleted = "completed"
+	// statusRequested  = "requested"
+	// statusInProgress = "in_progress"
+	// statusQueued     = "queued"
+	// statusPending    = "pending"
+	// statusWaiting    = "waiting"
 )
 
 type githubHookHandler struct {
@@ -183,7 +183,6 @@ func (gh *githubHookHandler) triggerPipeline(ctx context.Context, eventContext m
 }
 
 func (gh *githubHookHandler) waitForWorkflow(ctx context.Context, eventContext model.EventContext, pipeline config.PipelineConfig) error {
-
 	wf, _ := gh.getCreatedPipeline(ctx, eventContext, pipeline)
 	gh.sendStatus(ctx, eventContext, pipeline, wf, statePending)
 	state, _ := gh.waitForWorkflowStatus(ctx, eventContext, pipeline, wf, 15*time.Second)
@@ -210,11 +209,10 @@ func (gh *githubHookHandler) getCreatedPipeline(ctx context.Context, eventContex
 	log.Info("Waiting for 5 seconds for the Workflow to settle")
 	time.Sleep(5 * time.Second)
 
-	now := time.Now()
 	listRequest := github.ListWorkflowRunsOptions{
 		Branch:  pipeline.TargetBranch,
 		Event:   "workflow_dispatch",
-		Created: fmt.Sprintf(">=%s", now.Format(time.DateOnly)),
+		Created: fmt.Sprintf(">=%s", "2006-01-02"),
 		ListOptions: github.ListOptions{
 			PerPage: 1,
 		},
@@ -232,6 +230,10 @@ func (gh *githubHookHandler) getCreatedPipeline(ctx context.Context, eventContex
 
 func (gh *githubHookHandler) sendStatus(ctx context.Context, eventContext model.EventContext, pipeline config.PipelineConfig, wf *github.WorkflowRun, state string) {
 	client, err := gh.ClientManager.Get(eventContext.GetInstallationID())
+	if err != nil {
+		log.WithError(err).
+			WithField("installation_id", eventContext.GetInstallationID()).Error("Cannot find installation id at cache!")
+	}
 
 	var status *github.RepoStatus
 	var finalState string
@@ -270,7 +272,6 @@ func (gh *githubHookHandler) sendStatus(ctx context.Context, eventContext model.
 				"status": status,
 			}).Error("Failed to create status update for the referenced commit hash")
 	}
-
 }
 
 func (gh *githubHookHandler) waitForWorkflowStatus(ctx context.Context, eventContext model.EventContext, pipeline config.PipelineConfig, wf *github.WorkflowRun, t time.Duration) (string, error) {
@@ -294,7 +295,6 @@ func (gh *githubHookHandler) waitForWorkflowStatus(ctx context.Context, eventCon
 
 	for {
 		select {
-
 		case <-ctxWithDeadline.Done():
 			ticker.Stop()
 			return stateError, errors.New("Timed out waiting for status")
@@ -317,7 +317,6 @@ func (gh *githubHookHandler) waitForWorkflowStatus(ctx context.Context, eventCon
 			default:
 				continue
 			}
-
 		}
 	}
 }

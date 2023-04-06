@@ -55,7 +55,6 @@ func (wrec *WorkflowRunEventContext) IsFork() bool {
 }
 
 func (wrec *WorkflowRunEventContext) GetType() string {
-
 	switch wrec.workflowRun.GetEvent() {
 	case "push":
 		if wrec.workflowRun.GetHeadBranch() != "" {
@@ -65,7 +64,6 @@ func (wrec *WorkflowRunEventContext) GetType() string {
 	default:
 		return wrec.workflowRun.GetEvent()
 	}
-
 }
 
 func (wrec *WorkflowRunEventContext) GetWorkflow() string {
