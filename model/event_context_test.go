@@ -69,21 +69,21 @@ func createPipelineConfiguration() []config.PipelineConfig {
 				{
 					Webhook:    []string{"workflow_run"},
 					Repository: "^mattermost/dedicated$",
-					Type:       "pr",
-					Fork:       false,
+					Type:       "pull_request",
+					// Fork:       false,
 				},
 			},
 		},
 		{
 			Organization: "a",
 			Repository:   "b",
-			Workflow:     "dedicated-repo-branch",
+			Workflow:     "dedicated-repo-push",
 			Conditions: []config.PipelineCondition{
 				{
 					Webhook:    []string{"workflow_run"},
 					Repository: "^mattermost/dedicated$",
-					Type:       "branch",
-					Fork:       true,
+					Type:       "push",
+					// Fork:       true,
 				},
 			},
 		},
@@ -107,7 +107,7 @@ func createPipelineConfiguration() []config.PipelineConfig {
 				{
 					Webhook:    []string{"workflow_run"},
 					Repository: "^mattermost/workflow$",
-					Type:       "pr",
+					Type:       "pull_request",
 					Workflow:   "Build",
 				},
 			},
@@ -120,7 +120,7 @@ func createPipelineConfiguration() []config.PipelineConfig {
 				{
 					Webhook:    []string{"workflow_run"},
 					Repository: "^mattermost/conclusion$",
-					Type:       "pr",
+					Type:       "pull_request",
 					Workflow:   "Build",
 					Conclusion: "success",
 				},
@@ -134,7 +134,7 @@ func createPipelineConfiguration() []config.PipelineConfig {
 				{
 					Webhook:    []string{"workflow_run"},
 					Repository: "^mattermost/status$",
-					Type:       "pr",
+					Type:       "pull_request",
 					Workflow:   "Build",
 					Status:     "queued",
 				},
@@ -148,10 +148,10 @@ func createPipelineConfiguration() []config.PipelineConfig {
 				{
 					Webhook:    []string{"workflow_run"},
 					Repository: "^mattermost/a.*$",
-					Name:       "feat/a.*",
-					Type:       "pr",
-					Workflow:   "Build",
-					Status:     "queued",
+					// Name:       "feat/a.*",
+					Type:     "pull_request",
+					Workflow: "Build",
+					Status:   "queued",
 				},
 			},
 		},
@@ -171,7 +171,7 @@ func TestEventContext(t *testing.T) {
 			event:      "workflow_run",
 			repository: "mattermost/dedicated",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "",
 			name:       "",
 			status:     "",
@@ -182,12 +182,12 @@ func TestEventContext(t *testing.T) {
 		assert.NotNil(t, pipeline)
 		assert.Equal(t, "dedicated-repo-pr", pipeline.Workflow)
 	})
-	t.Run("All Branch events in the repository", func(t *testing.T) {
+	t.Run("All Push events in the repository", func(t *testing.T) {
 		eventContext := &eventContextFixture{
 			event:      "workflow_run",
 			repository: "mattermost/dedicated",
 			fork:       false,
-			_type:      "branch",
+			_type:      "push",
 			conclusion: "",
 			name:       "",
 			status:     "",
@@ -196,7 +196,7 @@ func TestEventContext(t *testing.T) {
 		}
 		pipeline := GetTargetPipeline(eventContext, pipelineConfiguration)
 		assert.NotNil(t, pipeline)
-		assert.Equal(t, "dedicated-repo-branch", pipeline.Workflow)
+		assert.Equal(t, "dedicated-repo-push", pipeline.Workflow)
 	})
 	t.Run("All Tag events in the repository", func(t *testing.T) {
 		eventContext := &eventContextFixture{
@@ -214,43 +214,43 @@ func TestEventContext(t *testing.T) {
 		assert.NotNil(t, pipeline)
 		assert.Equal(t, "dedicated-repo-tag", pipeline.Workflow)
 	})
-	t.Run("No pipeline for forked pr", func(t *testing.T) {
-		eventContext := &eventContextFixture{
-			event:      "workflow_run",
-			repository: "mattermost/dedicated",
-			fork:       true,
-			_type:      "pr",
-			conclusion: "",
-			name:       "",
-			status:     "",
-			workflow:   "",
-			commitHash: "",
-		}
-		pipeline := GetTargetPipeline(eventContext, pipelineConfiguration)
-		assert.Nil(t, pipeline)
-	})
-	t.Run("Forked Branch event pipeline check", func(t *testing.T) {
-		eventContext := &eventContextFixture{
-			event:      "workflow_run",
-			repository: "mattermost/dedicated",
-			fork:       true,
-			_type:      "branch",
-			conclusion: "",
-			name:       "",
-			status:     "",
-			workflow:   "",
-			commitHash: "",
-		}
-		pipeline := GetTargetPipeline(eventContext, pipelineConfiguration)
-		assert.NotNil(t, pipeline)
-		assert.Equal(t, "dedicated-repo-branch", pipeline.Workflow)
-	})
+	// t.Run("No pipeline for forked pr", func(t *testing.T) {
+	// 	eventContext := &eventContextFixture{
+	// 		event:      "workflow_run",
+	// 		repository: "mattermost/dedicated",
+	// 		fork:       true,
+	// 		_type:      "pull_request",
+	// 		conclusion: "",
+	// 		name:       "",
+	// 		status:     "",
+	// 		workflow:   "",
+	// 		commitHash: "",
+	// 	}
+	// 	pipeline := GetTargetPipeline(eventContext, pipelineConfiguration)
+	// 	assert.Nil(t, pipeline)
+	// })
+	// t.Run("Forked Branch event pipeline check", func(t *testing.T) {
+	// 	eventContext := &eventContextFixture{
+	// 		event:      "workflow_run",
+	// 		repository: "mattermost/dedicated",
+	// 		fork:       true,
+	// 		_type:      "branch",
+	// 		conclusion: "",
+	// 		name:       "",
+	// 		status:     "",
+	// 		workflow:   "",
+	// 		commitHash: "",
+	// 	}
+	// 	pipeline := GetTargetPipeline(eventContext, pipelineConfiguration)
+	// 	assert.NotNil(t, pipeline)
+	// 	assert.Equal(t, "dedicated-repo-push", pipeline.Workflow)
+	// })
 	t.Run("Workflow event pipeline check", func(t *testing.T) {
 		eventContext := &eventContextFixture{
 			event:      "workflow_run",
 			repository: "mattermost/workflow",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "",
 			name:       "",
 			status:     "",
@@ -266,7 +266,7 @@ func TestEventContext(t *testing.T) {
 			event:      "workflow_run",
 			repository: "mattermost/workflow",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "",
 			name:       "",
 			status:     "",
@@ -281,7 +281,7 @@ func TestEventContext(t *testing.T) {
 			event:      "workflow_run",
 			repository: "mattermost/conclusion",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "success",
 			name:       "",
 			status:     "",
@@ -297,7 +297,7 @@ func TestEventContext(t *testing.T) {
 			event:      "workflow_run",
 			repository: "mattermost/conclusion",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "failure",
 			name:       "",
 			status:     "",
@@ -312,7 +312,7 @@ func TestEventContext(t *testing.T) {
 			event:      "workflow_run",
 			repository: "mattermost/status",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "",
 			name:       "",
 			status:     "queued",
@@ -328,7 +328,7 @@ func TestEventContext(t *testing.T) {
 			event:      "workflow_run",
 			repository: "mattermost/status",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "",
 			name:       "",
 			status:     "finished",
@@ -343,9 +343,9 @@ func TestEventContext(t *testing.T) {
 			event:      "workflow_run",
 			repository: "mattermost/abc",
 			fork:       false,
-			_type:      "pr",
+			_type:      "pull_request",
 			conclusion: "",
-			name:       "feat/abc",
+			// name:       "feat/abc",
 			status:     "queued",
 			workflow:   "Build",
 			commitHash: "",
@@ -354,15 +354,15 @@ func TestEventContext(t *testing.T) {
 		assert.NotNil(t, pipeline)
 		assert.Equal(t, "repo-workflow-name", pipeline.Workflow)
 	})
-	t.Run("Name pipeline negative check", func(t *testing.T) {
+	t.Run("Name pipeline with conlcusion does not exist", func(t *testing.T) {
 		eventContext := &eventContextFixture{
 			event:      "workflow_run",
 			repository: "mattermost/abc",
 			fork:       false,
-			_type:      "pr",
-			conclusion: "",
-			name:       "feat/bac",
-			status:     "queued",
+			_type:      "pull_request",
+			conclusion: "success",
+			// name:       "feat/bac",
+			status:     "completed",
 			workflow:   "Build",
 			commitHash: "",
 		}

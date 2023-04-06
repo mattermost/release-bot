@@ -35,6 +35,8 @@ linters:
     - gosimple
     - govet
     - ineffassign
+    ## Github status is with double `l`
+    ## server/github_hook_handler.go:243:47: `cancelled` is a misspelling of `canceled` (misspell)
     # - misspell
     - nakedret
     - typecheck

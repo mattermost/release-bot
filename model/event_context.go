@@ -84,7 +84,6 @@ func GetTargetPipeline(context EventContext, pipelines []config.PipelineConfig) 
 			// Commenting out fork check since we are going to use Github built in functionality to approve workflows for forks
 			// We are going to use only workflow_run events for now in order to be secure
 			// if context.IsFork() && !condition.Fork {
-			// 	fmt.Println(context.IsFork() && !condition.Fork)
 			// 	continue
 			// }
 

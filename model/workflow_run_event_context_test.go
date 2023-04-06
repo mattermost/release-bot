@@ -20,7 +20,7 @@ func TestWorkflowRunEventContext(t *testing.T) {
 		assert.Equal(t, "feat/cld-3876-create-github-release-bot-for-unified-ci", context.GetName())
 		assert.Equal(t, "mattermost/release-bot", context.GetRepository())
 		assert.Equal(t, "queued", context.GetStatus())
-		assert.Equal(t, "pr", context.GetType())
+		assert.Equal(t, "pull_request", context.GetType())
 		assert.Equal(t, "Build", context.GetWorkflow())
 		assert.Equal(t, int64(2926155304), context.GetWorkflowRunID())
 		assert.Equal(t, false, context.IsFork())
