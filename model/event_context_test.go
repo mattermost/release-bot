@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/mattermost/release-bot/config"
@@ -57,6 +58,10 @@ func (f *eventContextFixture) GetCommitHash() string {
 	return f.commitHash
 }
 func (f *eventContextFixture) Log() {
+}
+func (f *eventContextFixture) JSON() string {
+	b, _ := json.Marshal(f)
+	return string(b)
 }
 
 func createPipelineConfiguration() []config.PipelineConfig {

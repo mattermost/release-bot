@@ -1,26 +1,28 @@
 package model
 
 import (
+	"encoding/json"
+
 	"github.com/google/go-github/v45/github"
 	log "github.com/sirupsen/logrus"
 )
 
 type WorkflowRunEventContext struct {
-	event          string
+	Εvent          string `json:"event"`
 	action         string
 	repository     string
 	installationID int64
-	workflowRun    *github.WorkflowRun
+	WorkflowRun    *github.WorkflowRun `json:"eventPayload"`
 }
 
 func newWorkflowRunEventContext(event github.WorkflowRunEvent) EventContext {
 	workflowRun := event.GetWorkflowRun()
 	return &WorkflowRunEventContext{
-		event:          "workflow_run",
+		Εvent:          "workflow_run",
 		action:         event.GetAction(),
 		repository:     event.GetRepo().GetFullName(),
 		installationID: event.GetInstallation().GetID(),
-		workflowRun:    workflowRun,
+		WorkflowRun:    workflowRun,
 	}
 }
 
@@ -42,7 +44,7 @@ func (wrec *WorkflowRunEventContext) Log() {
 }
 
 func (wrec *WorkflowRunEventContext) GetEvent() string {
-	return wrec.event
+	return wrec.Εvent
 }
 
 func (wrec *WorkflowRunEventContext) GetAction() string {
@@ -51,37 +53,37 @@ func (wrec *WorkflowRunEventContext) GetAction() string {
 }
 
 func (wrec *WorkflowRunEventContext) IsFork() bool {
-	return wrec.workflowRun.GetRepository().GetFullName() != wrec.workflowRun.GetHeadRepository().GetFullName()
+	return wrec.WorkflowRun.GetRepository().GetFullName() != wrec.WorkflowRun.GetHeadRepository().GetFullName()
 }
 
 func (wrec *WorkflowRunEventContext) GetType() string {
-	switch wrec.workflowRun.GetEvent() {
+	switch wrec.WorkflowRun.GetEvent() {
 	case "push":
-		if wrec.workflowRun.GetHeadBranch() != "" {
+		if wrec.WorkflowRun.GetHeadBranch() != "" {
 			return "branch"
 		}
 		return "tag"
 	default:
-		return wrec.workflowRun.GetEvent()
+		return wrec.WorkflowRun.GetEvent()
 	}
 }
 
 func (wrec *WorkflowRunEventContext) GetWorkflow() string {
-	return wrec.workflowRun.GetName()
+	return wrec.WorkflowRun.GetName()
 }
 
 func (wrec *WorkflowRunEventContext) GetWorkflowRunID() int64 {
-	return wrec.workflowRun.GetID()
+	return wrec.WorkflowRun.GetID()
 }
 
 func (wrec *WorkflowRunEventContext) GetConclusion() string {
 	// Can be one of: success, failure, neutral, cancelled, timed_out, action_required, stale, null, skipped, startup_failure
-	return wrec.workflowRun.GetConclusion()
+	return wrec.WorkflowRun.GetConclusion()
 }
 
 func (wrec *WorkflowRunEventContext) GetStatus() string {
 	// Can be one of: requested, in_progress, completed, queued, pending, waiting
-	return wrec.workflowRun.GetStatus()
+	return wrec.WorkflowRun.GetStatus()
 }
 
 func (wrec *WorkflowRunEventContext) GetRepository() string {
@@ -89,7 +91,7 @@ func (wrec *WorkflowRunEventContext) GetRepository() string {
 }
 
 func (wrec *WorkflowRunEventContext) GetName() string {
-	return wrec.workflowRun.GetHeadBranch()
+	return wrec.WorkflowRun.GetHeadBranch()
 }
 
 func (wrec *WorkflowRunEventContext) GetInstallationID() int64 {
@@ -97,5 +99,11 @@ func (wrec *WorkflowRunEventContext) GetInstallationID() int64 {
 }
 
 func (wrec *WorkflowRunEventContext) GetCommitHash() string {
-	return wrec.workflowRun.GetHeadSHA()
+	return wrec.WorkflowRun.GetHeadSHA()
+}
+
+func (wrec *WorkflowRunEventContext) JSON() string {
+	// We never care for the error
+	b, _ := json.Marshal(wrec)
+	return string(b)
 }

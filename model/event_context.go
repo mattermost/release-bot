@@ -22,6 +22,7 @@ type EventContext interface {
 	GetCommitHash() string
 	GetType() string
 	IsFork() bool
+	JSON() string
 	Log()
 }
 

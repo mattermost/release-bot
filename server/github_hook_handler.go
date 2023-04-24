@@ -151,11 +151,9 @@ func (gh *githubHookHandler) triggerPipeline(ctx context.Context, eventContext m
 		return err
 	}
 
-	// This needs to be parameterized
+	// Always pass the eventContext to the target workflow
 	inputs := map[string]interface{}{
-		"logLevel":    "info",
-		"tags":        true,
-		"environment": eventContext.GetCommitHash(),
+		"payload": eventContext.JSON(),
 	}
 
 	deRequest := github.CreateWorkflowDispatchEventRequest{
