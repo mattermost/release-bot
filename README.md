@@ -26,9 +26,31 @@ After that you can subscribe to webhooks referring to the repos your application
 In order for a pipeline of a private repo to be triggered **it needs to be declared on the configuration file under the [pipelines spec](https://github.com/mattermost/release-bot/blob/main/config/config.go#L32)**. This is by design for security reasons.
  
 > **All configuration properties are required**
-> Currently we do not support dynamic inputs for workflows 
 
-The workflow file to be triggered **must have at least the [workflow dispatch event configured](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch)**
+The workflow file to be triggered **must have at least the [workflow dispatch event configured](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch)** and an input called `payload`. You can then use our custom action to export some triggere metadata if needed.  
+Simplest example below:
+
+```yaml
+name: test
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: "The triggerer payload"
+        required: false
+        type: string
+
+jobs:
+  export-the-variables:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: mattermost/actions/release/expose-webhook-vars@b34961014df898b876673ca578c06ad6efc1577b
+        with:
+          payload: ${{ inputs.payload }}
+
+      - run: env | grep TRIGGERER
+```
 
 | Configuration Property | Type          | Available Values                                               | Description                                                                 |
 | ---------------------- | ------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
