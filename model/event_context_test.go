@@ -219,37 +219,6 @@ func TestEventContext(t *testing.T) {
 		assert.NotNil(t, pipeline)
 		assert.Equal(t, "dedicated-repo-tag", pipeline.Workflow)
 	})
-	// t.Run("No pipeline for forked pr", func(t *testing.T) {
-	// 	eventContext := &eventContextFixture{
-	// 		event:      "workflow_run",
-	// 		repository: "mattermost/dedicated",
-	// 		fork:       true,
-	// 		_type:      "pull_request",
-	// 		conclusion: "",
-	// 		name:       "",
-	// 		status:     "",
-	// 		workflow:   "",
-	// 		commitHash: "",
-	// 	}
-	// 	pipeline := GetTargetPipeline(eventContext, pipelineConfiguration)
-	// 	assert.Nil(t, pipeline)
-	// })
-	// t.Run("Forked Branch event pipeline check", func(t *testing.T) {
-	// 	eventContext := &eventContextFixture{
-	// 		event:      "workflow_run",
-	// 		repository: "mattermost/dedicated",
-	// 		fork:       true,
-	// 		_type:      "branch",
-	// 		conclusion: "",
-	// 		name:       "",
-	// 		status:     "",
-	// 		workflow:   "",
-	// 		commitHash: "",
-	// 	}
-	// 	pipeline := GetTargetPipeline(eventContext, pipelineConfiguration)
-	// 	assert.NotNil(t, pipeline)
-	// 	assert.Equal(t, "dedicated-repo-push", pipeline.Workflow)
-	// })
 	t.Run("Workflow event pipeline check", func(t *testing.T) {
 		eventContext := &eventContextFixture{
 			event:      "workflow_run",
@@ -359,7 +328,7 @@ func TestEventContext(t *testing.T) {
 		assert.NotNil(t, pipeline)
 		assert.Equal(t, "repo-workflow-name", pipeline.Workflow)
 	})
-	t.Run("Name pipeline with conlcusion does not exist", func(t *testing.T) {
+	t.Run("Name pipeline with conclcusion does not exist", func(t *testing.T) {
 		eventContext := &eventContextFixture{
 			event:      "workflow_run",
 			repository: "mattermost/abc",

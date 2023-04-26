@@ -100,6 +100,7 @@ func GetTargetPipeline(context EventContext, pipelines []config.PipelineConfig) 
 			}
 
 			// Check if workflow conclusion is the one that is condigured
+			//nolint:misspell
 			// Can be one of: success, failure, neutral, cancelled, timed_out, action_required, stale, null, skipped, startup_failure
 			if condition.Conclusion != "" && condition.Conclusion != context.GetConclusion() {
 				continue

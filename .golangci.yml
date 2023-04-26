@@ -28,19 +28,16 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - deadcode
     - gocritic
     - gofmt
     - goimports
     - gosimple
     - govet
     - ineffassign
-    ## Github status is with double `l`
-    ## server/github_hook_handler.go:243:47: `cancelled` is a misspelling of `canceled` (misspell)
-    # - misspell
+    - misspell
+    - nolintlint
     - nakedret
     - typecheck
     - unconvert
-    - varcheck
     - whitespace
     - revive

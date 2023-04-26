@@ -77,6 +77,7 @@ func (wrec *WorkflowRunEventContext) GetWorkflowRunID() int64 {
 }
 
 func (wrec *WorkflowRunEventContext) GetConclusion() string {
+	//nolint:misspell
 	// Can be one of: success, failure, neutral, cancelled, timed_out, action_required, stale, null, skipped, startup_failure
 	return wrec.WorkflowRun.GetConclusion()
 }

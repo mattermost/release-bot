@@ -35,6 +35,7 @@ type PipelineConfig struct {
 	Workflow     string              `mapstructure:"workflow"`
 	TargetBranch string              `mapstructure:"targetBranch"`
 	Timeout      string              `mapstructure:"timeout"`
+	SleepSeconds int64               `mapstructure:"sleepSeconds"`
 	Context      string              `mapstructure:"context"`
 	Conditions   []PipelineCondition `mapstructure:"conditions"`
 }

@@ -60,6 +60,7 @@ jobs:
 | targetBranch           | `string`      | the target branch of the worklflow                             | The Github repository branch of the worklfow to trigger                     |
 | context                | `string`      | valid status check name                                        | The Github status check name to apply to the originating commit             |
 | timeout                | `duration`    | valid [golang duration](https://pkg.go.dev/time#ParseDuration) | The duration to wait for the workflow to finish                             |
+| sleepSeconds           | `int64`       | valid seconds integer                                          | The duration to sleep after triggering the workflow finish                  |
 | conditions             | `[]condition` | valid list of conditions                                       | The conditions that need to apply in order for the workflow to be triggered |
 
 Below a detailed condition table

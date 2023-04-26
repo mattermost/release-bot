@@ -16,6 +16,7 @@ pipelines:
   - organization: mattermost
     repository: "******"
     workflow: docker.yaml
+    sleep_seconds: 5
     targetBranch: master
     context: ee/github
     timeout: 1h
