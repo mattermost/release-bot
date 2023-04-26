@@ -24,12 +24,10 @@ linters-settings:
     severity: warning
     rules:
       - name: atomic
-      
 
 linters:
   disable-all: true
   enable:
-    - deadcode
     - gocritic
     - gofmt
     - goimports
@@ -37,9 +35,9 @@ linters:
     - govet
     - ineffassign
     - misspell
+    - nolintlint
     - nakedret
     - typecheck
     - unconvert
-    - varcheck
     - whitespace
     - revive

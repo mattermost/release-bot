@@ -1,7 +1,7 @@
 # This dockerfile is used to build Mattermost Release Bot.
 # A multi stage build, with golang used as a builder
 # and gcr.io/distroless/static-debian11 as runner
-ARG GO_IMAGE=golang:1.18@sha256:90c06f42c1aa2b6b96441c0e6192aff48815cf5e7950cd661ed316fdbfb06ed4
+ARG GO_IMAGE=golang:1.20@sha256:f7099345b8e4a93c62dc5102e7eb19a9cdbad12e7e322644eeaba355d70e616d
 # hadolint ignore=DL3006
 FROM ${GO_IMAGE} as builder
 
